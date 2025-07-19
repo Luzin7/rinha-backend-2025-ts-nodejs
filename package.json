@@ -1,0 +1,45 @@
+{
+  "name": "payment-intermediate",
+  "version": "1.0.0",
+  "description": "This is a project set up by [Confectus](https://www.npmjs.com/package/confectus).",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --import=tsx --test src/**/*.spec.ts",
+    "start": "node --env-file=.env dist/app.js",
+    "dev": "tsx --env-file=.env --watch src/app.ts",
+    "start:worker": "node --env-file=.env dist/worker.js",
+    "dev:worker": "tsx --env-file=.env --watch src/worker.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "cors": "^2.8.5",
+    "fastify": "^5.4.0",
+    "ioredis": "^5.6.1",
+    "pg": "^8.16.3",
+    "tsx": "^4.20.3",
+    "undici": "^7.12.0",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.13",
+    "@types/pg": "^8.15.4",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.1",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}

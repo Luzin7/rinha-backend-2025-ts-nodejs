@@ -10,7 +10,7 @@ services:
       - POSTGRES_USER=rinha
       - POSTGRES_DB=rinha
     volumes:
-      - ./postgres/init:/docker-entrypoint-initdb.d
+      - ./sql:/docker-entrypoint-initdb.d
     networks:
       - backend
     healthcheck:
@@ -62,12 +62,11 @@ services:
           cpus: "0.05"
           memory: "15MB"
 
-  # -------------
-  # API + WATCHER
-  # -------------
+  # ---
+  # API
+  # ---
   api1: &api
     image: luzin7/rinha-2025-app:latest
-    build: .
     hostname: api1
     command: node dist/app.js
     environment:
@@ -95,12 +94,11 @@ services:
     <<: *api
     hostname: api2
 
-  # ------
-  # WORKER
-  # ------
+  # ------------------
+  # WORKER + WATCHER
+  # ------------------
   worker1: &worker
     image: luzin7/rinha-2025-app:latest
-    build: .
     hostname: worker1
     command: sh -c "node dist/worker.js & node dist/watcher.js"
     environment:

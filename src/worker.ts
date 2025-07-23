@@ -1,15 +1,10 @@
-import cluster from 'cluster';
 import { request } from 'undici';
 import { REDIS_STATUS_KEY } from './constants/redis-keys';
 import { env } from './env';
 import { redis } from './infra/cache/redis';
 import { pool } from './infra/database/pg-connection';
 
-const {
-  PAYMENT_PROCESSOR_URL_DEFAULT,
-  PAYMENT_PROCESSOR_URL_FALLBACK,
-  WORKER_PROCESSES,
-} = env;
+const { PAYMENT_PROCESSOR_URL_DEFAULT, PAYMENT_PROCESSOR_URL_FALLBACK } = env;
 const { default: defaultKey, fallback } = REDIS_STATUS_KEY;
 
 async function insertPayment(
@@ -118,14 +113,4 @@ async function runWorker() {
   }
 }
 
-if (cluster.isPrimary) {
-  for (let i = 0; i < WORKER_PROCESSES; i++) {
-    cluster.fork();
-  }
-
-  cluster.on('exit', () => {
-    cluster.fork();
-  });
-} else {
-  runWorker();
-}
+runWorker();

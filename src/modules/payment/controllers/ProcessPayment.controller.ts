@@ -7,7 +7,10 @@ import { ProcessPaymentService } from '../services/ProcessPayment.service';
 export class ProcessPaymentController implements Controller {
   constructor(private paymentService: ProcessPaymentService) {}
 
-  async handle(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  handle = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> => {
     const validation = paymentBodySchema.safeParse(request.body);
 
     if (!validation.success) {
@@ -32,5 +35,5 @@ export class ProcessPaymentController implements Controller {
     return reply
       .status(202)
       .send({ message: 'payment processed successfully' });
-  }
+  };
 }

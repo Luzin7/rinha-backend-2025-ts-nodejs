@@ -7,7 +7,10 @@ import { PaymentSummaryService } from '../services/PaymentSummary.service';
 export class PaymentSummaryController implements Controller {
   constructor(private paymentService: PaymentSummaryService) {}
 
-  async handle(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  handle = async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ): Promise<void> => {
     const validation = summaryQuerySchema.safeParse(request.query);
 
     if (!validation.success) {
@@ -32,5 +35,5 @@ export class PaymentSummaryController implements Controller {
     const summary = response.value;
 
     reply.send(summary);
-  }
+  };
 }

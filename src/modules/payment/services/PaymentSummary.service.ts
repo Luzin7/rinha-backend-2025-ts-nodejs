@@ -1,6 +1,5 @@
-import Redis from 'ioredis';
+import { Pool } from 'pg';
 import { Either, left, right } from '../../../core/errors/Either';
-import { pool } from '../../../infra/database/pg-connection';
 import { Service } from '../../../shared/contracts/Service';
 import { GetSummaryParams } from '../dtos/GetSummaryParams.dto';
 import { Summary } from '../dtos/Summary.dto';
@@ -15,12 +14,12 @@ type Error = DatabaseError | UnexpectedResultError;
 export class PaymentSummaryService
   implements Service<GetSummaryParams, Error, Summary>
 {
-  constructor(private cache: Redis) {}
+  constructor(private db: Pool) {}
 
-  async execute({
+  execute = async ({
     from,
     to,
-  }: GetSummaryParams): Promise<Either<QueueError, Summary>> {
+  }: GetSummaryParams): Promise<Either<QueueError, Summary>> => {
     let dbResult;
     let queryText = `
         SELECT 
@@ -51,7 +50,7 @@ export class PaymentSummaryService
     queryText += ' GROUP BY processor;';
 
     try {
-      dbResult = await pool.query(queryText, queryParams);
+      dbResult = await this.db.query(queryText, queryParams);
     } catch (error) {
       console.error('[SERVICE_ERROR] Summay query error:', error);
       return left(new DatabaseError());
@@ -77,5 +76,5 @@ export class PaymentSummaryService
     }
 
     return right(summary);
-  }
+  };
 }

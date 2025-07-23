@@ -5,7 +5,7 @@ import { PurgePaymentsService } from '../services/PurgePayments.service';
 export class PurgePaymentsController implements Controller {
   constructor(private paymentService: PurgePaymentsService) {}
 
-  async handle(_: FastifyRequest, reply: FastifyReply): Promise<void> {
+  handle = async (_: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const result = await this.paymentService.execute();
 
     if (result.isLeft()) {
@@ -14,5 +14,5 @@ export class PurgePaymentsController implements Controller {
     }
 
     return reply.status(204).send();
-  }
+  };
 }

@@ -1,22 +1,25 @@
 import Redis from 'ioredis';
+import { Pool } from 'pg';
 import { REDIS_STATUS_KEY } from '../../../constants/redis-keys';
 import { Either, left, right } from '../../../core/errors/Either';
-import { pool } from '../../../infra/database/pg-connection';
 import { Service } from '../../../shared/contracts/Service';
 import { GetSummaryParams } from '../dtos/GetSummaryParams.dto';
-import { DatabaseError, QueueError } from '../payment.errors';
+import { DatabaseError } from '../payment.errors';
 
 type Error = DatabaseError;
 
 export class PurgePaymentsService
   implements Service<GetSummaryParams, Error, null>
 {
-  constructor(private cache: Redis) {}
+  constructor(
+    private cache: Redis,
+    private db: Pool,
+  ) {}
 
-  async execute(): Promise<Either<QueueError, null>> {
+  execute = async (): Promise<Either<Error, null>> => {
     try {
       await Promise.all([
-        pool.query('TRUNCATE TABLE payments RESTART IDENTITY;'),
+        this.db.query('TRUNCATE TABLE payments RESTART IDENTITY;'),
 
         this.cache.del('payment_queue'),
 
@@ -29,5 +32,5 @@ export class PurgePaymentsService
     } catch (error) {
       return left(new DatabaseError(`Failed to purge data`));
     }
-  }
+  };
 }

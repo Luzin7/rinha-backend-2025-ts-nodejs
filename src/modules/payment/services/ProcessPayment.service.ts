@@ -11,10 +11,10 @@ export class ProcessPaymentService
 {
   constructor(private cache: Redis) {}
 
-  async execute({
+  execute = async ({
     amount,
     correlationId,
-  }: QueuePayment): Promise<Either<Error, null>> {
+  }: QueuePayment): Promise<Either<Error, null>> => {
     const jobPayload = JSON.stringify({ correlationId, amount });
 
     const jobIsQueued = await this.cache
@@ -28,5 +28,5 @@ export class ProcessPaymentService
     }
 
     return right(null);
-  }
+  };
 }

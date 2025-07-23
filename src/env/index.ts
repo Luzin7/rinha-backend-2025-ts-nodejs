@@ -7,6 +7,8 @@ const envSchema = z.object({
   DB_PASSWORD: z.string().default('rinha'),
   DB_NAME: z.string().default('rinha'),
 
+  WORKER_PROCESSES: z.coerce.number().default(2),
+
   CACHE_HOST: z.string().default('cache'),
   CACHE_PORT: z.coerce.number().default(6379),
 

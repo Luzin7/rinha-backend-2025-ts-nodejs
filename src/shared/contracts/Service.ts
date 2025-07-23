@@ -1,13 +1,10 @@
 import { Either } from '../../core/errors/Either';
 import { ServiceError } from '../../core/errors/ServiceError';
 
-export abstract class Service<
+export interface Service<
   Request = unknown,
   Errors extends ServiceError | null = null,
   Response = null,
 > {
-  abstract execute(
-    props: Request,
-    ctx?: unknown,
-  ): Promise<Either<Errors, Response>>;
+  execute(props: Request, ctx?: unknown): Promise<Either<Errors, Response>>;
 }

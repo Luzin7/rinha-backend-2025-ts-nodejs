@@ -23,7 +23,7 @@ services:
       resources:
         limits:
           cpus: "0.30"
-          memory: "100MB"
+          memory: "118MB"
 
   cache:
     image: redis:7.2-alpine
@@ -39,8 +39,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.15"
-          memory: "25MB"
+          cpus: "0.10"
+          memory: "6MB"
 
   # -------------
   # LOAD BALANCER
@@ -59,8 +59,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.05"
-          memory: "15MB"
+          cpus: "0.1"
+          memory: "16MB"
 
   # ---
   # API
@@ -87,8 +87,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.15"
-          memory: "50MB"
+          cpus: "0.10"
+          memory: "40MB"
 
   api2:
     <<: *api
@@ -119,8 +119,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.35"
-          memory: "55MB"
+          cpus: "0.40"
+          memory: "70MB"
 
   worker2:
     <<: *worker

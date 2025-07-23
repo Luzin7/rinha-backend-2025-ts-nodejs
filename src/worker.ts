@@ -95,9 +95,16 @@ async function runWorker() {
       const result = await redis.brpop('payment_queue', 0);
       if (result) {
         const jobData = JSON.parse(result[1]);
-        const jobPromise = processPayment(jobData).finally(() => {
-          activeJobs.splice(activeJobs.indexOf(jobPromise), 1);
-        });
+        const jobPromise = processPayment(jobData)
+          .catch((err) => {
+            console.error(
+              `[WORKER] Job ${jobData.correlationId} falhou com erro não tratado:`,
+              err,
+            );
+          })
+          .finally(() => {
+            activeJobs.splice(activeJobs.indexOf(jobPromise), 1);
+          });
         activeJobs.push(jobPromise);
 
         if (activeJobs.length >= MAX_JOBS) {

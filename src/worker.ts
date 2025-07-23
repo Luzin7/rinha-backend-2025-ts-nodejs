@@ -1,10 +1,15 @@
+import cluster from 'cluster';
 import { request } from 'undici';
 import { REDIS_STATUS_KEY } from './constants/redis-keys';
 import { env } from './env';
 import { redis } from './infra/cache/redis';
 import { pool } from './infra/database/pg-connection';
 
-const { PAYMENT_PROCESSOR_URL_DEFAULT, PAYMENT_PROCESSOR_URL_FALLBACK } = env;
+const {
+  PAYMENT_PROCESSOR_URL_DEFAULT,
+  PAYMENT_PROCESSOR_URL_FALLBACK,
+  WORKER_PROCESSES,
+} = env;
 const { default: defaultKey, fallback } = REDIS_STATUS_KEY;
 
 async function insertPayment(
@@ -47,10 +52,9 @@ async function processPayment(job: { correlationId: string; amount: number }) {
 
       await insertPayment(correlationId, amount, 'default');
       return;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.warn(
-        `[WORKER] DEFAULT failed even UP, trying FALLBACK to ${correlationId}`,
+        `[WORKER] DEFAULT failed even UP, trying FALLBACK to ${correlationId}: ${error}`,
       );
     }
   }
@@ -83,10 +87,9 @@ async function processPayment(job: { correlationId: string; amount: number }) {
   }
 }
 
-async function startWorker() {
+async function runWorker() {
   const MAX_JOBS = 30;
   const activeJobs: Promise<unknown>[] = [];
-  console.log('[WORKER] Service started');
   while (true) {
     try {
       const result = await redis.brpop('payment_queue', 0);
@@ -103,10 +106,19 @@ async function startWorker() {
       }
     } catch (error) {
       console.error('[WORKER] Main loop error:', error);
-      // eslint-disable-next-line promise/param-names
-      await new Promise((res) => setTimeout(res, 5000));
+      await new Promise((_resolve) => setTimeout(_resolve, 5000));
     }
   }
 }
 
-startWorker();
+if (cluster.isPrimary) {
+  for (let i = 0; i < WORKER_PROCESSES; i++) {
+    cluster.fork();
+  }
+
+  cluster.on('exit', () => {
+    cluster.fork();
+  });
+} else {
+  runWorker();
+}

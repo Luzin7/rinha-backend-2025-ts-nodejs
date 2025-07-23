@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { redis } from '../../infra/cache/redis';
+import { pool } from '../../infra/database/pg-connection';
 import { PaymentSummaryController } from './controllers/PaymentSummary.controller';
 import { ProcessPaymentController } from './controllers/ProcessPayment.controller';
 import { PurgePaymentsController } from './controllers/PurgePayments.controller';
@@ -12,11 +13,11 @@ export async function paymentRoutes(app: FastifyInstance) {
   const processPaymentController = new ProcessPaymentController(
     processPaymentService,
   );
-  const paymentSummaryService = new PaymentSummaryService(redis);
+  const paymentSummaryService = new PaymentSummaryService(pool);
   const paymentSummaryController = new PaymentSummaryController(
     paymentSummaryService,
   );
-  const purgePaymentsService = new PurgePaymentsService(redis);
+  const purgePaymentsService = new PurgePaymentsService(redis, pool);
   const purgePaymentsController = new PurgePaymentsController(
     purgePaymentsService,
   );

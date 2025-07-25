@@ -11,6 +11,7 @@ services:
       - POSTGRES_DB=rinha
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
+    command: postgres -c log_statement=none -c log_min_messages=panic -c max_connections=450 -c synchronous_commit=off -c fsync=off
     networks:
       - backend
     healthcheck:
@@ -23,7 +24,7 @@ services:
       resources:
         limits:
           cpus: "0.30"
-          memory: "118MB"
+          memory: "108MB"
 
   cache:
     image: redis:7.2-alpine
@@ -67,6 +68,7 @@ services:
   # ---
   api1: &api
     image: luzin7/rinha-2025-app:latest
+    pull_policy: always
     hostname: api1
     command: node dist/app.js
     environment:
@@ -99,6 +101,7 @@ services:
   # ------------------
   worker1: &worker
     image: luzin7/rinha-2025-app:latest
+    pull_policy: always
     hostname: worker1
     command: sh -c "node dist/worker.js & node dist/watcher.js"
     environment:

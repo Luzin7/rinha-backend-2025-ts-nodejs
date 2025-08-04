@@ -70,12 +70,10 @@ async function runWatcherCycle() {
   }
 }
 
-function startWatcher() {
+export function startWatcher() {
   console.log(`[WATCHER] service started`);
 
   runWatcherCycle();
 
   setInterval(runWatcherCycle, 5000);
 }
-
-startWatcher();

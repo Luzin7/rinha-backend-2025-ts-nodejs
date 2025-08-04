@@ -1,4 +1,4 @@
 export interface GetSummaryParams {
-  from?: string;
-  to?: string;
+  from: string;
+  to: string;
 }

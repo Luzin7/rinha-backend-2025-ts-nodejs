@@ -1,8 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import z from 'zod';
-import { Controller } from '../../../shared/contracts/Controller';
-import { summaryQuerySchema } from '../schemas/summaryQueue.schema';
-import { PaymentSummaryService } from '../services/PaymentSummary.service';
+import { Controller } from '../../../core/contracts/Controller';
+import { summaryQuerySchema } from '../schemas/summaryQueue';
+import { PaymentSummaryService } from '../services/PaymentSummary';
 
 export class PaymentSummaryController implements Controller {
   constructor(private paymentService: PaymentSummaryService) {}

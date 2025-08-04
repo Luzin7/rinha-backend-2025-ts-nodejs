@@ -1,5 +1,5 @@
-import { Either } from '../../core/errors/Either';
-import { ServiceError } from '../../core/errors/ServiceError';
+import { Either } from '../errors/Either';
+import { ServiceError } from '../errors/ServiceError';
 
 export interface Service<
   Request = unknown,

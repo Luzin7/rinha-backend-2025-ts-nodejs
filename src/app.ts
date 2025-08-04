@@ -1,4 +1,3 @@
-import cors from '@fastify/cors';
 import fastify from 'fastify';
 import { env } from './env';
 import { paymentRoutes } from './modules/payment/payment.routes';
@@ -6,12 +5,7 @@ import { paymentRoutes } from './modules/payment/payment.routes';
 const app = fastify({
   logger: false,
 });
-app.register(cors, {
-  origin: ['*'], // CALMA MAINHA ISSO EH TEMPORARIO
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-});
+
 app.register(paymentRoutes);
 
 const port = env.APP_PORT;

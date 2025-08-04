@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { Controller } from '../../../shared/contracts/Controller';
-import { PurgePaymentsService } from '../services/PurgePayments.service';
+import { Controller } from '../../../core/contracts/Controller';
+import { PurgePaymentsService } from '../services/PurgePayments';
 
 export class PurgePaymentsController implements Controller {
   constructor(private paymentService: PurgePaymentsService) {}

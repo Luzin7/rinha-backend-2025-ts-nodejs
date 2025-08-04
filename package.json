@@ -9,7 +9,8 @@
     "dev": "tsx --env-file=.env --watch src/app.ts",
     "start:worker": "node --env-file=.env dist/worker.js",
     "dev:worker": "tsx --env-file=.env --watch src/worker.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "doc": "docker compose down -v && docker compose up --build --force-recreate"
   },
   "keywords": [],
   "author": "",
@@ -17,19 +18,17 @@
   "type": "commonjs",
   "dependencies": {
     "@fastify/cors": "^11.0.1",
-    "cors": "^2.8.5",
+    "bullmq": "^5.56.8",
     "fastify": "^5.4.0",
     "ioredis": "^5.6.1",
-    "pg": "^8.16.3",
+    "p-limit": "^6.2.0",
     "tsx": "^4.20.3",
     "undici": "^7.12.0",
     "zod": "^4.0.5"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.13",
-    "@types/pg": "^8.15.4",
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^8.57.1",

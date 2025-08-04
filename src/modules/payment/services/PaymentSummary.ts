@@ -38,17 +38,10 @@ export class PaymentSummaryService
         }
       }
 
-      summary.default.totalAmount = this.safeDollar(
-        summary.default.totalAmount,
-      );
-      summary.fallback.totalAmount = this.safeDollar(
-        summary.fallback.totalAmount,
-      );
-
-      console.log(
-        `[SERVICE] Resumo de pagamentos entre ${fromTs} e ${toTs}:`,
-        JSON.stringify(summary, null, 2),
-      );
+      summary.default.totalAmount =
+        Math.round(summary.default.totalAmount * 100) / 100;
+      summary.fallback.totalAmount =
+        Math.round(summary.fallback.totalAmount * 100) / 100;
 
       return right(summary);
     } catch (error) {
@@ -56,9 +49,4 @@ export class PaymentSummaryService
       return left(new SummaryError());
     }
   };
-
-  private safeDollar(input: number, scaleFactor: bigint = 100n): number {
-    const fixed = BigInt(Math.round(input * Number(scaleFactor)));
-    return Number(fixed) / (100 * Number(scaleFactor));
-  }
 }

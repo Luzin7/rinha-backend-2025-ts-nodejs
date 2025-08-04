@@ -42,14 +42,14 @@ export class ProcessPaymentService
   ) {
     this.defaultConfig = {
       url: paymentProcessorUrlDefault,
-      timeout: 400,
+      timeout: 1500,
       maxFailures: 2,
       circuitBreakerTimeout: 2500,
     };
 
     this.fallbackConfig = {
       url: paymentProcessorUrlFallback,
-      timeout: 500,
+      timeout: 1800,
       maxFailures: 2,
       circuitBreakerTimeout: 2500,
     };
@@ -95,9 +95,7 @@ export class ProcessPaymentService
       return right({ processor: 'fallback' });
     }
 
-    console.error(
-      `[WORKER] Todos os processadores falharam para ${correlationId}`,
-    );
+    console.error(`[WORKER] Falhou geral ${correlationId}`);
     return left(new ServiceError('All payment processors failed', 503));
   };
 
@@ -156,7 +154,7 @@ export class ProcessPaymentService
     state.failureCount++;
     state.lastFailureTime = Date.now();
 
-    if (state.failureCount >= 5) {
+    if (state.failureCount >= 8) {
       state.isCircuitOpen = true;
       console.warn('[WORKER] Circuit breaker aberto devido a muitas falhas');
     }
@@ -167,7 +165,8 @@ export class ProcessPaymentService
     { amount, correlationId }: QueuePayment,
     processorName: 'default' | 'fallback',
   ): Promise<boolean> {
-    const payload = { correlationId, amount, requestedAt: new Date() };
+    const requestedAt = new Date();
+    const payload = { correlationId, amount, requestedAt };
 
     const { statusCode } = await request(`${config.url}/payments`, {
       method: 'POST',
@@ -179,15 +178,51 @@ export class ProcessPaymentService
     });
 
     if (statusCode >= 200 && statusCode < 300) {
-      await this.paymentRepository.insertPaymentSummary(
+      await this.savePaymentWithRetry(
         correlationId,
         amount,
         processorName,
+        requestedAt.getTime(),
       );
       return true;
     }
 
     return false;
+  }
+
+  private async savePaymentWithRetry(
+    correlationId: string,
+    amount: number,
+    processorName: 'default' | 'fallback',
+    timestamp: number,
+    maxRetries: number = 3,
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await this.paymentRepository.insertPaymentSummary(
+          correlationId,
+          amount,
+          processorName,
+          timestamp,
+        );
+        return;
+      } catch (error) {
+        console.error(
+          `[REDIS_RETRY] Tentativa ${attempt}/${maxRetries} falhou para ${correlationId}:`,
+          error,
+        );
+
+        if (attempt === maxRetries) {
+          console.error(
+            `[CRITICAL_FAILURE] Todas as ${maxRetries} tentativas falharam para ${correlationId}`,
+          );
+          throw error;
+        }
+
+        const delay = 50 * Math.pow(2, attempt - 1);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
   }
 
   resetFailureCounts(): void {

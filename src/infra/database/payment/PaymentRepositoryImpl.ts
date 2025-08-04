@@ -7,13 +7,31 @@ export class PaymentRepositoryImpl implements PaymentRepository {
     correlationId: string,
     amount: number,
     processor: 'default' | 'fallback',
+    timestamp: number,
   ) {
-    const timestamp = Date.now();
     const data = JSON.stringify({
       p: processor,
-      a: amount * 100,
+      a: amount,
       id: correlationId,
     });
-    await this.database.zadd('payments', 'NX', timestamp, data);
+
+    const pipeline = this.database.pipeline();
+    pipeline.zadd('payments', 'NX', timestamp, data);
+    const results = await pipeline.exec();
+
+    if (!results || results.length === 0) {
+      throw new Error('Pipeline Redis falhou');
+    }
+
+    const [error, result] = results[0];
+    if (error) {
+      throw error;
+    }
+
+    if (result === 0) {
+      console.warn(
+        `[REDIS] Pagamento ${correlationId} já existe (duplicata ignorada)`,
+      );
+    }
   }
 }

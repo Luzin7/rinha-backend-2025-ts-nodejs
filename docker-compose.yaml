@@ -5,19 +5,19 @@ services:
   cache:
     image: redis:7.2-alpine
     hostname: cache
-    command: redis-server --save "" --appendonly no --maxclients 20000
+    command: redis-server --save "" --appendonly no --maxclients 20000 --maxmemory 40mb --maxmemory-policy noeviction --tcp-keepalive 60
     networks:
       - backend
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 15s
+      timeout: 3s
+      retries: 3
     deploy:
       resources:
         limits:
-          cpus: "0.20"
-          memory: "50MB"
+          cpus: "0.1"
+          memory: "40MB"
 
   # -------------
   # LOAD BALANCER
@@ -36,8 +36,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.10"
-          memory: "38MB"
+          cpus: "0.1"
+          memory: "35MB"
 
   # ---
   # API
@@ -45,13 +45,14 @@ services:
   api1: &api
     build: .
     hostname: api1
-    command: node dist/app.js
+    command: node --max-old-space-size=50 --gc-interval=100 dist/app.js
     environment:
       - APP_PORT=9999
       - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
       - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
       - CACHE_HOST=cache
       - CACHE_PORT=6379
+      - NODE_ENV=production
     networks:
       - backend
       - payment-processor
@@ -60,26 +61,27 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.10"
-          memory: "40MB"
+          cpus: "0.15"
+          memory: "65MB"
 
   api2:
     <<: *api
     hostname: api2
 
-  # ------------------
-  # WORKER + WATCHER
-  # ------------------
+  # ------
+  # WORKER
+  # ------
   worker1:
     build: .
     hostname: worker1
-    command: node dist/bootstrap.js
+    command: node --max-old-space-size=120 --gc-interval=100 dist/bootstrap.js
     environment:
       - APP_PORT=9999
       - PAYMENT_PROCESSOR_URL_DEFAULT=http://payment-processor-default:8080
       - PAYMENT_PROCESSOR_URL_FALLBACK=http://payment-processor-fallback:8080
       - CACHE_HOST=cache
       - CACHE_PORT=6379
+      - NODE_ENV=production
     networks:
       - backend
       - payment-processor
@@ -89,11 +91,7 @@ services:
       resources:
         limits:
           cpus: "1"
-          memory: "180MB"
-
-  # worker2:
-  #   <<: *worker
-  #   hostname: worker2
+          memory: "145MB"
 
 networks:
   backend:

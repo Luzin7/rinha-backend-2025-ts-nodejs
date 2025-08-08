@@ -4,6 +4,7 @@ import { paymentRoutes } from './modules/payment/payment.routes';
 
 const app = fastify({
   logger: false,
+  disableRequestLogging: true,
 });
 
 app.register(paymentRoutes);

@@ -4,6 +4,8 @@ import { ProcessPaymentService } from './modules/payment/services/ProcessPayment
 
 export class PaymentWorker {
   private readonly CONCURRENCY: number;
+  private worker?: Worker;
+
   constructor(
     private processPayment: ProcessPaymentService,
     private redis: Redis,
@@ -15,7 +17,7 @@ export class PaymentWorker {
   execute() {
     console.log('[WORKER] Iniciando...');
 
-    const worker = new Worker(
+    this.worker = new Worker(
       'payment_queue',
       async (job) => {
         const { correlationId, amount } = job.data;
@@ -31,7 +33,7 @@ export class PaymentWorker {
       },
     );
 
-    worker.on('failed', (job, err) => {
+    this.worker.on('failed', (job, err) => {
       console.error(
         `[WORKER] Job ${job?.id} falhou após todas as tentativas:`,
         err,

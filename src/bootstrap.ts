@@ -24,7 +24,7 @@ const bootstrap = new Bootstrap(
       paymentProcessorUrlFallback,
     ),
     redis,
-    180,
+    15,
   ),
 );
 

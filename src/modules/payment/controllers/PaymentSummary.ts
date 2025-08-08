@@ -23,8 +23,8 @@ export class PaymentSummaryController implements Controller {
     const { from, to } = validation.data;
 
     const response = await this.paymentService.execute({
-      from,
-      to,
+      from: from || '',
+      to: to || '',
     });
 
     if (response.isLeft()) {
